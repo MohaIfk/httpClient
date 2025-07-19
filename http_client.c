@@ -110,7 +110,16 @@ typedef struct {
     wchar_t* path;
 } url_components_t;
 
-url_components_t* parse_url(const char* url) {
+void free_url_components(url_components_t* components) {
+    if (!components) return;
+
+    free(components->scheme);
+    free(components->host);
+    free(components->path);
+    free(components);
+}
+
+url_components_t *parse_url(const char *url) {
     wchar_t* wurl = char_to_wchar(url);
     if (!wurl) return NULL;
 
@@ -118,14 +127,10 @@ url_components_t* parse_url(const char* url) {
     memset(&urlComp, 0, sizeof(urlComp));
     urlComp.dwStructSize = sizeof(urlComp);
 
-    // Allocate buffers
-    wchar_t scheme[256], host[256], path[2048];
-    urlComp.lpszScheme = scheme;
-    urlComp.dwSchemeLength = sizeof(scheme) / sizeof(wchar_t);
-    urlComp.lpszHostName = host;
-    urlComp.dwHostNameLength = sizeof(host) / sizeof(wchar_t);
-    urlComp.lpszUrlPath = path;
-    urlComp.dwUrlPathLength = sizeof(path) / sizeof(wchar_t);
+    // Initial dummy lengths to trigger correct size filling
+    urlComp.dwSchemeLength = 1;
+    urlComp.dwHostNameLength = 1;
+    urlComp.dwUrlPathLength = 1;
 
     if (!WinHttpCrackUrl(wurl, 0, 0, &urlComp)) {
         free(wurl);
@@ -138,22 +143,38 @@ url_components_t* parse_url(const char* url) {
         return NULL;
     }
 
-    components->scheme = _wcsdup(scheme);
-    components->host = _wcsdup(host);
-    components->port = urlComp.nPort;
-    components->path = _wcsdup(path);
+    // Allocate dynamic buffers based on reported sizes
+    components->scheme = malloc((urlComp.dwSchemeLength + 1) * sizeof(wchar_t));
+    components->host   = malloc((urlComp.dwHostNameLength + 1) * sizeof(wchar_t));
+    components->path   = malloc((urlComp.dwUrlPathLength + 1) * sizeof(wchar_t));
 
+    if (!components->scheme || !components->host || !components->path) {
+        free_url_components(components);
+        free(wurl);
+        return NULL;
+    }
+
+    // Second pass
+    URL_COMPONENTS urlComp2;
+    memset(&urlComp2, 0, sizeof(urlComp2));
+    urlComp2.dwStructSize = sizeof(urlComp2);
+
+    urlComp2.lpszScheme = components->scheme;
+    urlComp2.dwSchemeLength = urlComp.dwSchemeLength + 1;
+    urlComp2.lpszHostName = components->host;
+    urlComp2.dwHostNameLength = urlComp.dwHostNameLength + 1;
+    urlComp2.lpszUrlPath = components->path;
+    urlComp2.dwUrlPathLength = urlComp.dwUrlPathLength + 1;
+
+    if (!WinHttpCrackUrl(wurl, 0, 0, &urlComp2)) {
+        free_url_components(components);
+        free(wurl);
+        return NULL;
+    }
+
+    components->port = urlComp2.nPort;
     free(wurl);
     return components;
-}
-
-void free_url_components(url_components_t* components) {
-    if (!components) return;
-
-    free(components->scheme);
-    free(components->host);
-    free(components->path);
-    free(components);
 }
 
 // Get method name as wide string
