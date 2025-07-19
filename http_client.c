@@ -477,8 +477,5 @@ char* http_url_encode(const char* str) {
     }
 
     encoded[j] = '\0';
-
-    // Resize to actual size
-    char* result = realloc(encoded, j + 1);
-    return result ? result : encoded;
+    return encoded; // Negligible Waste: The worst-case buffer size is already quite small in absolute terms (at most 3x the input length) no need for realloc(encoded, j + 1)
 }
