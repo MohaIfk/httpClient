@@ -362,7 +362,7 @@ http_response_t* http_request(http_client_t* client, http_request_t* request) {
 http_response_t* http_get(http_client_t* client, const char* url) {
     http_request_t request = {0};
     request.method = HTTP_GET;
-    request.url = (char*)url;
+    request.url = url;
 
     return http_request(client, &request);
 }
@@ -371,7 +371,7 @@ http_response_t* http_get(http_client_t* client, const char* url) {
 http_response_t* http_post(http_client_t* client, const char* url, const char* data, const char* content_type) {
     http_request_t request = {0};
     request.method = HTTP_POST;
-    request.url = (char*)url;
+    request.url = url;
 
     if (data) {
         request.body = (char*)data;

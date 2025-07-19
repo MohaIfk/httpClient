@@ -38,7 +38,7 @@ typedef struct {
 // HTTP Request structure
 typedef struct {
     http_method_t method;
-    char* url;
+    const char* url;
     char* headers;
     char* body;
     size_t body_length;
