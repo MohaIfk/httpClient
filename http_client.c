@@ -378,7 +378,7 @@ http_response_t* http_post(http_client_t* client, const char* url, const char* d
     request.url = url;
 
     if (data) {
-        request.body = (char*)data;
+        request.body = data;
         request.body_length = strlen(data);
     }
 
@@ -405,10 +405,10 @@ http_response_t* http_post(http_client_t* client, const char* url, const char* d
 http_response_t* http_put(http_client_t* client, const char* url, const char* data, const char* content_type) {
     http_request_t request = {0};
     request.method = HTTP_PUT;
-    request.url = (char*)url;
+    request.url = url;
 
     if (data) {
-        request.body = (char*)data;
+        request.body = data;
         request.body_length = strlen(data);
     }
 
@@ -435,7 +435,7 @@ http_response_t* http_put(http_client_t* client, const char* url, const char* da
 http_response_t* http_delete(http_client_t* client, const char* url) {
     http_request_t request = {0};
     request.method = HTTP_DELETE;
-    request.url = (char*)url;
+    request.url = url;
 
     return http_request(client, &request);
 }

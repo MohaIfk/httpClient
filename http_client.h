@@ -40,7 +40,7 @@ typedef struct {
     http_method_t method;
     const char* url;
     char* headers;
-    char* body;
+    const char* body;
     size_t body_length;
 } http_request_t;
 
