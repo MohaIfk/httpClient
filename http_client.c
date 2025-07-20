@@ -128,13 +128,9 @@ url_components_t *parse_url(const char *url) {
     urlComp.dwStructSize = sizeof(urlComp);
 
     // Initial placeholder lengths to trigger the correct size filling
-    // Set pointers to NULL and lengths to 0 to query for required buffer sizes.
-    urlComp.lpszScheme = NULL;
-    urlComp.dwSchemeLength = 0;
-    urlComp.lpszHostName = NULL;
-    urlComp.dwHostNameLength = 0;
-    urlComp.lpszUrlPath = NULL;
-    urlComp.dwUrlPathLength = 0;
+    urlComp.dwSchemeLength = 1;
+    urlComp.dwHostNameLength = 1;
+    urlComp.dwUrlPathLength = 1;
 
     if (!WinHttpCrackUrl(wurl, 0, 0, &urlComp)) {
         free(wurl);
